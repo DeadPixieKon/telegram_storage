@@ -1,0 +1,14 @@
+[Unit]
+Description=My Python Script
+After=network.target
+
+[Service]
+ExecStart=/home/deadphixie/PycharmProjects/PythonProject/.venv/bin/python /home/deadphixie/PycharmProjects/PythonProject/main.py
+WorkingDirectory=/home/deadphixie/PycharmProjects/PythonProject
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=deadphixie
+
+[Install]
+WantedBy=multi-user.target
