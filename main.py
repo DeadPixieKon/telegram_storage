@@ -228,6 +228,37 @@ class BotConfig:
         config.read(file)
         return config
 
+    @staticmethod
+    def read_last_id(config_file='config.ini'):
+        config = configparser.ConfigParser()
+        config.read(config_file)
+        last_id = config.get('Settings', 'last_id')
+        return int(last_id)
+
+    @staticmethod
+    def update_last_id(new_id, config_file='config.ini'):
+        config = configparser.ConfigParser()
+        config.read(config_file)
+
+        # Обновляем значение last_id
+        config.set('Settings', 'last_id', str(new_id))
+
+        # Записываем изменения обратно в файл
+        with open(config_file, 'w') as configfile:
+            config.write(configfile)
+
+    @staticmethod
+    def get_file_id_counter():
+        n = BotConfig.read_last_id()
+
+        def inner():
+            nonlocal n
+            n += 1
+            BotConfig.update_last_id(n)
+            return n
+
+        return inner
+
     
     @staticmethod
     def is_valid_folder_name(name: str) -> bool:
