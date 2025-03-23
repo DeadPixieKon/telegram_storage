@@ -200,7 +200,6 @@ def answer(call:types.CallbackQuery):
                                                   message_id=msg.message_id,
                                                   reply_markup=inner_button_murkup.delete_folders())).id
         case Data.DELETE_FILE:
-            # так же надо реализовать отправку удаляемого файла
             # s[1] - путь s[2] - имя файла
             bot.edit_message_text(text="Trying to send", chat_id=usr_id, message_id=msg.message_id)
             system_file_path: str = ctlg.retrieve_system_file_path(ctlg.path, s[2])
@@ -210,7 +209,6 @@ def answer(call:types.CallbackQuery):
             os.remove(system_file_path)
             bot.edit_message_text(text="file deleted\n" + s[1] + s[2], chat_id=usr_id, message_id=msg.message_id)
         case Data.DELETE_FOLDER:
-            # так же надо реализовать отправку удаляемого файла
             # s[1] - путь s[2] - имя папки
             if not ctlg.delete_folder(ctlg.path + s[2]):
                 bot.edit_message_text(text="Папка не пустая перед удалением почистите", chat_id=usr_id, 
@@ -225,7 +223,7 @@ def handle_docs_photo(message):
         file_info = bot.get_file(message.document.file_id)
         downloaded_file = bot.download_file(file_info.file_path)
         last_id = BotConfig.read_last_id()
-        src = ctlg.path + "file" + str(last_id + 1)
+        src = "storage/" + "file" + str(last_id + 1)
         with open(src, 'wb') as new_file:
             new_file.write(downloaded_file)
         ctlg.insert_new_file(file_name=message.document.file_name, system_file_path=src)
