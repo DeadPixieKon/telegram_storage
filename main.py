@@ -3,7 +3,6 @@ import configparser
 import telebot
 from telebot import types
 
-from CodeExecuter import CodeExecuter
 from Catalog import Sostoyanie
 from Catalog import Catalog
 from InnerBottonsMarkup import InnerBottonsMarkup
@@ -297,7 +296,8 @@ def send_welcome(message:types.Message):
 
 @bot.message_handler(commands=['tree'])
 def send_welcome(message: types.Message):
-    bot.send_message(message.from_user.id, CodeExecuter.execute("tree -F " + CodeExecuter.get_working_path()))
+    # bot.send_message(message.from_user.id, CodeExecuter.execute("tree -F " + CodeExecuter.get_working_path()))
+    bot.send_message(message.from_user.id, Catalog.get_tree())
 
 @bot.message_handler(commands=['delete'])
 def send_welcome(message:types.Message):
@@ -363,10 +363,10 @@ def answer(call:types.CallbackQuery):
         case Data.CHANGE_FOLDER:
             match s[2]:
                 case Data.Status.EXIT:
-                    if len(Catalog.get_path().split('/')) <= 2:
+                    if len(Catalog.parse_path(Catalog.get_path())) <= 2:
                         bot.edit_message_text(text="Can't quit root folder!", chat_id=usr_id, message_id=msg.message_id)
                         return None
-                    Catalog.exitFolder()
+                    Catalog.exit_folder()
                     bot.edit_message_text(text="exited folder\n" + Catalog.get_path(), chat_id=usr_id,
                                           message_id=msg.message_id)
                 case Data.Status.CREATE:
@@ -410,12 +410,12 @@ def answer(call:types.CallbackQuery):
             bot.edit_message_text(text="Trying to send", chat_id=usr_id, message_id=msg.message_id)
             with open(Catalog.get_path() + s[2], "rb") as file:
                 bot.send_document(call.from_user.id, document=file)
-            CodeExecuter.delete_file(Catalog.get_path(), s[2])
+            Catalog.delete_file(Catalog.get_path(), s[2])
             bot.edit_message_text(text="file deleted\n" + s[1] + s[2], chat_id=usr_id, message_id=msg.message_id)
         case Data.DELETE_FOLDER:
             # так же надо реализовать отправку удаляемого файла
             # s[1] - путь s[2] - имя папки
-            if not CodeExecuter.delete_folder(Catalog.get_path(), s[2]):
+            if not Catalog.delete_folder(Catalog.get_path() + s[2]):
                 bot.edit_message_text(text="Папка не пустая перед удалением почистите", chat_id=usr_id, message_id=msg.message_id)
             else:
                 bot.edit_message_text(text="file deleted\n" + s[1] + s[2], chat_id=usr_id, message_id=msg.message_id)

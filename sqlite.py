@@ -15,8 +15,13 @@ class DBWork:
     def parse_path(path: str) -> list:
         return [i for i in path.strip(".").split('/') if i.strip()]
 
+    def get_working_path(self) -> str:
+        return 'storage/'
+
     # Создание
     def create_new_folder(self, parent_folder_id: int, new_folder_name: str):
+        if new_folder_name.count('/') > 0:
+            return
         self.cur.execute(
             "UPDATE folders SET count_of_subfolders = count_of_subfolders + 1 WHERE id = ?",
             (parent_folder_id,)
@@ -47,6 +52,8 @@ class DBWork:
 
     # Функция для вставки файла в базу данных
     def insert_file(self, file_name: str, folder_id: int, file_path: str):
+        if file_name.count('/') > 0:
+            return
         self.cur.execute(
             "INSERT INTO files (folder_id, file_name, file_link) VALUES (?, ?, ?)",
             (folder_id, file_name, file_path)
@@ -198,12 +205,19 @@ class DBWork:
         # print("-" * 30, "RESULT", "-" * 30)
         return tree
 
+    # методы добавленные для работы с Сatalog
+    def chеck_existane(self, path: str, file_name:str="") -> bool:
+        if file_name == "":
+            return self.get_folder_id(path) != -1
+        else:
+            return self.get_file_id(path, file_name) != -1
 
-db = DBWork()
-# db.create_new_folder(parent_folder_id=9, new_folder_name="third level")
+
+# db = DBWork()
+# db.create_new_folder(parent_folder_id=1, new_folder_name="USA")
 # db.delete_folder(folder_id=3)
-# db.insert_file(file_name="lol.txt", folder_id=3, file_path="storage/file2")
-# db.insert_file(file_name="kak.txt", folder_id=8, file_path="storage/file1")
+# db.insert_file(file_name="lol.txt", folder_id=1, file_path="storage/file2")
+# db.insert_file(file_name="kak.txt", folder_id=1, file_path="storage/file1")
 # print(db.retrieve_file(2))
 # db.delete_file(file_id=6)
 # print(db.get_how_many(folder_id=3))
@@ -213,6 +227,6 @@ db = DBWork()
 # print(db.get_folder_id("storage/first level"))
 # print(db.get_file_id("storage/first level", "lol.txt"))
 # print(db.get_file_id("storage/first level/lol.txt"))
-print(db.get_tree())
+# print(db.get_tree())
 # print("-" * 30, "RESULT", "-" * 30)
 # print(db.get_folder_id("storage/first level/second level third"))
