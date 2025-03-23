@@ -10,106 +10,106 @@ class Sostoyanie:
     TEXT_PROCESSING: int = 4
 
 
-class Catalog: # Catalog
-    # 1-ая статическая переменная / реализация
-    db = DBWork()
-    path = db.get_working_path()
-    @staticmethod
-    def get_path() -> str:
-        return Catalog.path
-    @staticmethod
-    def set_path(path:str) -> None:
-        Catalog.path = path
+class Catalog:
+    def __init__(self):
+        self.__db = DBWork()
+        self.__path = self.__db.get_working_path()
+        self.__sostoyanie = 0
 
-    # 2-ая статическая переменная / реализация
-    sostoyanie = 0
-    @staticmethod
-    def get_sostoyanie() -> int:
-        return Catalog.sostoyanie
-    @staticmethod
-    def set_sostoyanie(sostoyanie: int) -> None:
-        Catalog.sostoyanie = sostoyanie
+    @property
+    def path(self) -> str:
+        return self.__path
+
+    @path.setter
+    def path(self, path:str) -> None:
+        self.__path = path
+
+    @property
+    def db(self):
+        return self.__db
+
+    @property
+    def sostoyanie(self) -> int:
+        return self.__sostoyanie
+
+    @sostoyanie.setter
+    def sostoyanie(self, sostoyanie: int) -> None:
+        self.__sostoyanie = sostoyanie
 
 
     @staticmethod
     def parse_path(path: str) -> list:
-        return Catalog.db.parse_path(Catalog.path)
+        return DBWork.parse_path(path)
 
-    @staticmethod
-    def check_existane(path: str, file_name:str="") -> bool:
-        return Catalog.db.chеck_existane(path, file_name)
-
+    def check_existane(self, path: str, file_name:str="") -> bool:
+        return self.__db.chеck_existane(path, file_name)
 
     # обертка гэттеров на DBWork
-    @staticmethod
-    def get_folders_list() -> list:
-        return [i[1] for i in Catalog.db.get_folders_list(Catalog.db.get_folder_id(Catalog.path))]
-    @staticmethod
-    def get_files_list() -> list:
-        return [i[1] for i in Catalog.db.get_files_list(Catalog.db.get_folder_id(Catalog.path))]
+    def get_folders_list(self) -> list:
+        return [i[1] for i in self.__db.get_folders_list(self.__db.get_folder_id(self.__path))]
+
+    def get_files_list(self) -> list:
+        return [i[1] for i in self.__db.get_files_list(self.__db.get_folder_id(self.__path))]
 
 
     # перемещение
-    @staticmethod
-    def move_to_folder(folder_name: str) -> bool:
+    def move_to_folder(self, folder_name: str) -> bool:
         if folder_name[-1] != '/': folder_name = folder_name + '/'
-        if not Catalog.db.chеck_existane(Catalog.path + folder_name):
+        if not self.__db.chеck_existane(self.__path + folder_name):
             return False
-        path = Catalog.path
+        path = self.__path
         path = path + folder_name
-        Catalog.path = path
+        self.__path = path
         return True
 
-    @staticmethod
-    def exit_folder():
-        path = Catalog.path
+    def exit_folder(self):
+        path = self.__path
         if path.strip('/') == "storage":
             return
         else:
             a = path[:-1].rindex('/')
             path = path[:a + 1]
-        Catalog.path = path
+        self.__path = path
 
 
     # Создание
-    @staticmethod
-    def create_new_folder(new_folder_name:str) -> bool:
+    def create_new_folder(self, new_folder_name:str) -> bool:
         if new_folder_name.count('/') > 0:
             return False
         try:
-            Catalog.db.create_new_folder(Catalog.db.get_folder_id(Catalog.path), new_folder_name)
+            self.__db.create_new_folder(self.__db.get_folder_id(self.__path), new_folder_name)
         except Exception:
             return False # похоже такая папка уже существует
         return True # все ок
 
-    @staticmethod
-    def insert_new_file(file_name:str, system_file_path: str) -> bool:
+    def insert_new_file(self, file_name:str, system_file_path: str) -> bool:
         if file_name.count('/') > 0:
             return False
-        folder_id: int = Catalog.db.get_folder_id(Catalog.get_path())
-        Catalog.db.insert_file(file_name=file_name, file_path=system_file_path, folder_id=folder_id)
+        folder_id: int = self.__db.get_folder_id(self.__path)
+        self.__db.insert_file(file_name=file_name, file_path=system_file_path, folder_id=folder_id)
         return True
+
+    def retrieve_system_file_path(self, path: str, file_name: str):
+        return self.__db.retrieve_file(self.__db.get_file_id(path, file_name))
 
 
     # Удаление
-    @staticmethod
-    def delete_folder(path: str) -> bool:
+    def delete_folder(self, path: str) -> bool:
         try:
-            Catalog.db.delete_folder(Catalog.db.get_folder_id(path))
-            return True
-        except Exception:
-            return False
-    @staticmethod
-    def delete_file(path: str, delete_file_name: str) -> bool:
-        try:
-            Catalog.db.delete_file(Catalog.db.get_file_id(path, delete_file_name))
+            self.__db.delete_folder(self.__db.get_folder_id(path))
             return True
         except Exception:
             return False
 
-    @staticmethod
-    def get_tree() -> str:
-        return Catalog.db.get_tree()
+    def delete_file(self, path: str, delete_file_name: str) -> bool:
+        try:
+            self.__db.delete_file(self.__db.get_file_id(path, delete_file_name))
+            return True
+        except Exception:
+            return False
+
+    def get_tree(self) -> str:
+        return self.__db.get_tree()
 
 
 # ctlg = Catalog()

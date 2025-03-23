@@ -4,7 +4,10 @@ import _sqlite3
 
 class DBWork:
     def __init__(self, db_path="bot_storage.db"):
-        self.conn: _sqlite3.Connection = sqlite3.connect(db_path)
+        # self.conn: _sqlite3.Connection = sqlite3.connect(db_path)
+        self.conn: _sqlite3.Connection = sqlite3.connect(
+            database=db_path, timeout=5.0, detect_types=0, isolation_level='DEFERRED', check_same_thread=False,
+            factory=sqlite3.Connection, cached_statements=128, uri=False)
         self.cur: _sqlite3.Cursor = self.conn.cursor()
 
     def __del__(self):
