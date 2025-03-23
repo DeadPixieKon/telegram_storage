@@ -69,7 +69,7 @@ class InnerBottonsMarkup:
         return markup
 
     @staticmethod
-    def base_keyboard(self) -> types.ReplyKeyboardMarkup:
+    def base_keyboard() -> types.ReplyKeyboardMarkup:
         markup = types.ReplyKeyboardMarkup()
         btn1 = types.KeyboardButton("изменить папку")
         markup.add(btn1)

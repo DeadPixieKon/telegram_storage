@@ -62,14 +62,15 @@ class Catalog:
         self.__path = path
         return True
 
-    def exit_folder(self):
+    def exit_folder(self) -> bool:
         path = self.__path
         if path.strip('/') == "storage":
-            return
+            return False
         else:
             a = path[:-1].rindex('/')
             path = path[:a + 1]
         self.__path = path
+        return True
 
 
     # Создание
@@ -112,7 +113,7 @@ class Catalog:
         return self.__db.get_tree()
 
 
-# ctlg = Catalog()
+ctlg = Catalog()
 # print(ctlg.chеck_existane("storage/", "lol.txt"))
 # print(ctlg.get_folders_list())
 # ctlg.move_to_folder("USA")
@@ -125,3 +126,7 @@ class Catalog:
 # ctlg.insert_new_file("lol.txt", "storage/file2")
 # ctlg.delete_file(ctlg.get_path(), "lol.txt")
 # print(ctlg.get_tree())
+ctlg.move_to_folder("USA")
+
+print(ctlg.path)
+ctlg.exit_folder()

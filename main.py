@@ -1,4 +1,5 @@
 import configparser
+import os
 
 import telebot
 from telebot import types
@@ -157,10 +158,9 @@ def answer(call:types.CallbackQuery):
         case Data.CHANGE_FOLDER:
             match s[2]:
                 case Data.Status.EXIT:
-                    if len(Catalog.parse_path(ctlg.path)) <= 2:
+                    if not ctlg.exit_folder():
                         bot.edit_message_text(text="Can't quit root folder!", chat_id=usr_id, message_id=msg.message_id)
                         return None
-                    ctlg.exit_folder()
                     bot.edit_message_text(text="exited folder\n" + ctlg.path, chat_id=usr_id,
                                           message_id=msg.message_id)
                 case Data.Status.CREATE:
@@ -177,7 +177,7 @@ def answer(call:types.CallbackQuery):
             bot.edit_message_text(text="Trying to send", chat_id=usr_id, message_id=msg.message_id)
             system_file_path: str = ctlg.retrieve_system_file_path(ctlg.path, s[2])
             with open(system_file_path, "rb") as file:
-                bot.send_document(call.from_user.id, document=file)
+                bot.send_document(call.from_user.id, document=file, visible_file_name=s[2])
             bot.edit_message_text(text="File \"" + s[2] + "\" sended", chat_id=usr_id, message_id=msg.message_id)
         case Data.BASE_DELETE:
             match s[2]:
@@ -205,8 +205,9 @@ def answer(call:types.CallbackQuery):
             bot.edit_message_text(text="Trying to send", chat_id=usr_id, message_id=msg.message_id)
             system_file_path: str = ctlg.retrieve_system_file_path(ctlg.path, s[2])
             with open(system_file_path, "rb") as file:
-                bot.send_document(call.from_user.id, document=file)
+                bot.send_document(call.from_user.id, document=file, visible_file_name=s[2])
             ctlg.delete_file(ctlg.path, s[2])
+            os.remove(system_file_path)
             bot.edit_message_text(text="file deleted\n" + s[1] + s[2], chat_id=usr_id, message_id=msg.message_id)
         case Data.DELETE_FOLDER:
             # так же надо реализовать отправку удаляемого файла
@@ -223,16 +224,15 @@ def handle_docs_photo(message):
     try:
         file_info = bot.get_file(message.document.file_id)
         downloaded_file = bot.download_file(file_info.file_path)
-        src = ctlg.path + message.document.file_name
+        last_id = BotConfig.read_last_id()
+        src = ctlg.path + "file" + str(last_id + 1)
         with open(src, 'wb') as new_file:
             new_file.write(downloaded_file)
+        ctlg.insert_new_file(file_name=message.document.file_name, system_file_path=src)
+        BotConfig.update_last_id(last_id + 1)
         bot.reply_to(message, "Пожалуй, я сохраню это")
     except Exception as exc:
         bot.reply_to(message, exc)
 
 
-
-
-
-print(ctlg.get_tree())
 bot.polling(non_stop=True, interval=0)
